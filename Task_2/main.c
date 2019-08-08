@@ -7,10 +7,10 @@
 
 void err_fork(pid_t *command)
 {
-	if (*command == -1) 
+	if (*command == -1)
 	{
 		perror("fork");
-        exit(EXIT_FAILURE);
+        	exit(EXIT_FAILURE);
     }
 }
 
@@ -32,6 +32,7 @@ int main()
 	int position_end = -1;
 	int status = 1;
 	int len_path = 1;
+	int exec_err = 0;
 	char *err_wd = NULL;
 	char buff[100] = {'/', 'b', 'i', 'n', '/'};
 	char name[50] = {'0'};
@@ -60,7 +61,11 @@ int main()
 		{
 			PWD[i+len_path-1] = path[i];
 		}
-		
+		PWD[i+len_path-1] = '\n';
+		for(i = 0; PWD[i] != '\n'; i++)
+		{
+			path[i] = PWD[i];
+		}
 	}
 	else if(path[0] == '/')
 	{
@@ -84,7 +89,6 @@ int main()
 		{
 			name[i] = path[i];
 		}
-		
 		for(i = 0; path[i] != '\n'; i++)
 		{
 			buff[i+5] = path[i];
@@ -94,23 +98,26 @@ int main()
 		{
 			path[i] = buff[i];
 		}
-		
 	}
 	printf("PWD:	%s\n", PWD);
 	printf("name:	%s\n", name);
 	printf("path:	%s\n", path);
 	
 	
-	/*command = fork();
+	command = fork();
 	err_fork(&command);
 	if(command == 0)
 	{
-		kid = getpid();
-		execl(, name, NULL);
+		exec_err = execl(path, name, NULL);
+		if(exec_err == -1)
+		{
+			printf("Error.");
+		}
 	}
 	else
 	{
-		waitpid(kid, &status, 0);
-	}*/
+		wait(&status);
+		printf("Proccess terminated\n");
+	}
 	exit(0);
 }
