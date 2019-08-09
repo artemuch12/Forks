@@ -26,18 +26,44 @@ void extra_slash(char *path)
 	}
 }
 
+void lex(char *path, int *number_lex)
+{
+	int i = 0;
+	for(i = 0; path[i-1] != '\n'; i++)
+    {
+		if((path[i] == ' '))
+        {
+			number_lex++;
+        }
+	}
+}
+
+
+
+
+
+
 int main()
 {
-	int i = 0, j = 0;
+	int i = 0, j = 0, k = -1, l = 0;
 	int position_end = -1;
 	int status = 1;
 	int len_path = 1;
 	int exec_err = 0;
+	int number_lex = 1;
+	int lenght = 0;
+	int poz1 = 0;
+    int poz2 = 0;
+	
+	
 	char *err_wd = NULL;
 	char buff[100] = {'/', 'b', 'i', 'n', '/'};
 	char name[50] = {'0'};
 	char path[100] = {'0'};
+	char buff_path[100] = {'0'};
+	char buff_str[50] = {'0'};
 	char PWD[254] = {'0'};
+	char **input = NULL;
 	pid_t command;
 	pid_t kid;
 	err_wd = getcwd(PWD, 254);
@@ -48,7 +74,50 @@ int main()
 	}
 	puts("Enter command");
 	fgets(path, 50, stdin);
-	printf("PWD:	%s\n", PWD);
+	lex(path, &number_lex);
+	input = malloc(sizeof(char **)*number_lex);
+	
+	
+	for(i = 0; path[i-1] != '\n'; i++)
+    {
+		if((path[i] == ' ') || (path[i] == '\n'))
+        {
+			poz1 = poz2;
+            poz2 = i;
+            if(poz1 == 0)
+            {
+				poz1 = -1;
+            }
+            if(k != -1)
+            {
+				for(j = poz1+1, l = 0; j < poz2; j++, l++)
+				{
+					buff_str[l] = path[j];
+				}
+				lenght = strlen(buff_str);
+				input[k] = malloc(sizeof(char *)*lenght);
+				for(j = 0; j < lenght; j++)
+				{
+					input[k][j] = buff_str[j];
+				}
+				k++;
+            }
+            else
+            {
+				for(j = poz1+1, l = 0; j < poz2; j++, l++)
+				{
+					buff_path[j] = path[j];
+				}
+				k++;
+			}
+        }
+	}
+	lenght = strlen(buff_path);
+	for(i = 0; i < lenght; i++)
+	{
+		path[i] = buff_path[i];
+	}
+	path[i] = '\n';
 	if(((path[0]) == '.') && (path[1] == '/'))
 	{
 		extra_slash(path);
@@ -108,7 +177,7 @@ int main()
 	err_fork(&command);
 	if(command == 0)
 	{
-		exec_err = execl(path, name, NULL);
+		exec_err = execle(path, name, NULL, input);
 		if(exec_err == -1)
 		{
 			printf("Error.");
@@ -119,5 +188,10 @@ int main()
 		wait(&status);
 		printf("Proccess terminated\n");
 	}
+	for(i = 0; i < number_lex -1; i++)
+	{
+		free(input[i]);
+	}
+	free(input);
 	exit(0);
 }
